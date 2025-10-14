@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Panel de administración - UTCJ Sustentable</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar modern-navbar" style="background:#00b28f;">
+    <img src="logo-utcj.png" alt="Logo UTCJ Sustentable" class="logo" />
+    <nav class="nav-links">
+      <a id="nav-inicio" class="nav-link">Inicio</a>
+      <span id="nav-user-links"></span>
+      <span id="nav-welcome" style="font-weight:bold;"></span>
+      <button id="btn-logout" onclick="logout()" style="display:none; margin-left:1rem; padding:0.5rem 1rem; border-radius:8px; border:none; background:#fff; color:#00b28f; font-weight:bold; cursor:pointer;">Cerrar sesión</button>
+    </nav>
+  </header>
+  <main>
+    <div class="admin-container">
+      <h2>Panel de administración</h2>
+      <div id="admin-content"></div>
+    </div>
+  </main>
+  <footer class="footer modern-footer">
+  <a id="footer-inicio" class="footer-link">Regresar al inicio</a>
+  </footer>
+  <script>
+    // Obtener parámetros de usuario
+    function getParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        correo: params.get('correo'),
+        tipo: params.get('tipo'),
+        nombre: params.get('nombre')
+      };
+    }
+    // Navegación dinámica y sesión
+    function insertUserLinks() {
+      const { correo, tipo, nombre } = getParams();
+      document.getElementById('nav-inicio').href = `index.html?correo=${correo||''}&tipo=${tipo||''}&nombre=${encodeURIComponent(nombre||'')}`;
+      document.getElementById('footer-inicio').href = `index.html?correo=${correo||''}&tipo=${tipo||''}&nombre=${encodeURIComponent(nombre||'')}`;
+      if (correo && tipo && nombre) {
+        document.getElementById('nav-user-links').innerHTML = `
+          <a href="perfil.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Perfil</a>
+          <a href="admin.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Panel Admin</a>
+        `;
+        document.getElementById('nav-welcome').textContent = `Bienvenido, ${nombre} (${tipo})`;
+        document.getElementById('btn-logout').style.display = 'inline-block';
+      } else {
+        document.getElementById('nav-user-links').innerHTML = '';
+        document.getElementById('nav-welcome').textContent = '';
+        document.getElementById('btn-logout').style.display = 'none';
+      }
+    }
+    function logout() {
+      window.location.href = "login.html";
+    }
+    window.onload = insertUserLinks;
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5SZxwItdXrGMp5DNxiw9d_xtpLxUZqzo",
+      authDomain: "pwa-universidad.firebaseapp.com",
+      projectId: "pwa-universidad",
+      storageBucket: "pwa-universidad.firebasestorage.app",
+      messagingSenderId: "329437595863",
+      appId: "1:329437595863:web:af435f53e527d8f036c892",
+      measurementId: "G-C99MQN9C0B"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    // Obtener usuario desde la URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    const correo = getQueryParam('correo');
+    const tipo = getQueryParam('tipo');
+    // Solo mostrar si es maestro
+    if (tipo === 'maestro') {
+      // Mostrar alumnos
+      db.collection('alumnos').get().then(res => {
+        let html = '<h3>Alumnos registrados</h3>';
+        res.forEach(doc => {
+          const datos = doc.data();
+          html += `<div>${datos.nombre} - ${datos.correo}</div>`;
+        });
+        document.getElementById('admin-content').innerHTML = html;
+      });
+      // Mostrar proyectos
+      db.collection('proyectos').where('correo', '==', correo).get().then(res => {
+        let html = '<h3>Mis proyectos</h3>';
+        res.forEach(doc => {
+          html += `<div>${JSON.stringify(doc.data())}</div>`;
+        });
+        document.getElementById('admin-content').innerHTML += html;
+      });
+    } else {
+      document.getElementById('admin-content').innerHTML = 'Acceso solo para maestros.';
+    }
+  </script>
+</body>
+</html>

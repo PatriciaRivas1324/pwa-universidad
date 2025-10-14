@@ -74,8 +74,8 @@
         }
       }
       if (usuario) {
-  // Redirigir al index con el nombre y tipo de usuario en la URL
-  window.location.href = `index.html?usuario=${encodeURIComponent(usuario.nombre)}&tipo=${encodeURIComponent(tipo)}`;
+  // Redirigir al index con correo, tipo y nombre en la URL
+  window.location.href = `index.html?correo=${encodeURIComponent(correo)}&tipo=${encodeURIComponent(tipo)}&nombre=${encodeURIComponent(usuario.nombre)}`;
       } else {
         alert('Correo o contraseña incorrectos.');
       }
