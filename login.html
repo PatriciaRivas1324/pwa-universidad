@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Iniciar sesión - UTCJ Sustentable</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar modern-navbar" style="background:#00b28f;">
+    <img src="logo-utcj.png" alt="Logo UTCJ Sustentable" class="logo" />
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">Inicio</a>
+      <a href="registro.html" class="nav-link">Registro</a>
+    </nav>
+  </header>
+  <main>
+    <div class="login-container">
+      <div class="login-header">
+        <span class="login-header-icon">🔑</span>
+        <span class="login-header-title">Iniciar sesión</span>
+      </div>
+      <form class="login-form" id="login-form">
+        <label for="correo-login">Correo institucional</label>
+        <input type="email" id="correo-login" name="correo-login" required>
+        <label for="contrasena-login">Contraseña</label>
+        <input type="password" id="contrasena-login" name="contrasena-login" required>
+        <div class="login-btns">
+          <button type="submit" class="login-btn btn-green">Entrar</button>
+          <a href="registro.html" class="login-btn btn-outline">Registrarse</a>
+        </div>
+      </form>
+    </div>
+  </main>
+  <footer class="footer modern-footer">
+    <a href="index.html" class="footer-link">Regresar al inicio</a>
+  </footer>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5SZxwItdXrGMp5DNxiw9d_xtpLxUZqzo",
+      authDomain: "pwa-universidad.firebaseapp.com",
+      projectId: "pwa-universidad",
+      storageBucket: "pwa-universidad.firebasestorage.app",
+      messagingSenderId: "329437595863",
+      appId: "1:329437595863:web:af435f53e527d8f036c892",
+      measurementId: "G-C99MQN9C0B"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    document.getElementById('login-form').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const correo = document.getElementById('correo-login').value.trim();
+      const contrasena = document.getElementById('contrasena-login').value;
+      if (!correo || !contrasena) {
+        alert('Por favor, completa todos los campos.');
+        return;
+      }
+      // Buscar en alumnos y maestros
+      let usuario = null;
+      let tipo = '';
+      // Buscar alumno
+      const alumnos = await db.collection('alumnos').where('correo', '==', correo).where('contrasena', '==', contrasena).get();
+      if (!alumnos.empty) {
+        usuario = alumnos.docs[0].data();
+        tipo = 'alumno';
+      } else {
+        // Buscar maestro
+        const maestros = await db.collection('maestros').where('correo', '==', correo).where('contrasena', '==', contrasena).get();
+        if (!maestros.empty) {
+          usuario = maestros.docs[0].data();
+          tipo = 'maestro';
+        }
+      }
+      if (usuario) {
+  // Redirigir al index con el nombre y tipo de usuario en la URL
+  window.location.href = `index.html?usuario=${encodeURIComponent(usuario.nombre)}&tipo=${encodeURIComponent(tipo)}`;
+      } else {
+        alert('Correo o contraseña incorrectos.');
+      }
+    });
+  </script>
+</body>
+</html>

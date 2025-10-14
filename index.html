@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prototipo Web - Módulos UTCJ</title>
+  <!-- Asegúrate de que style.css esté en la misma carpeta que este HTML -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar modern-navbar" style="background:#00b28f;">
+    <div class="container nav-content">
+      <img src="logo-utcj.png" alt="Logo UTCJ Sustentable" class="logo" />
+      <nav class="nav-links">
+        <a href="inicio.html" class="nav-link">Inicio</a>
+        <a href="nosotros.html" class="nav-link">Nosotros</a>
+        <a href="contacto.html" class="nav-link">Contacto</a>
+        <a href="registro.html" class="nav-link">Registro</a>
+      </nav>
+      <div id="usuario-info" style="margin-left:2rem;font-weight:bold;color:#fff;"></div>
+    </div>
+  </header>
+
+  <main class="container main-content">
+  <script>
+    // Mostrar nombre y tipo de usuario si viene en la URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    const usuario = getQueryParam('usuario');
+    const tipo = getQueryParam('tipo');
+    if (usuario && tipo) {
+      document.getElementById('usuario-info').textContent = `Bienvenido, ${usuario} (${tipo})`;
+    }
+  </script>
+    <!-- Carrusel de imágenes moderno -->
+    <div class="carousel-container modern-carousel">
+      <button id="carousel-prev" class="carousel-arrow modern-arrow">&#10094;</button>
+      <img id="carousel-image" src="img1.jpg" alt="Imagen carrusel" class="modern-carousel-img">
+      <button id="carousel-next" class="carousel-arrow modern-arrow">&#10095;</button>
+    </div>
+  <!-- Se eliminó el bloque azul de módulo 1 -->
+
+    <div class="cards">
+      <div class="card modern-card">
+        <div class="card-icon"><span>🌟</span></div>
+        <div>
+          <p class="card-sub">MÓDULO 1</p>
+          <p class="card-title">CUERPO ACADÉMICO Y PROYECTOS</p>
+        </div>
+      </div>
+      <div class="card modern-card">
+        <div class="card-icon"><span>🌱</span></div>
+        <div>
+          <p class="card-sub">MÓDULO 2</p>
+          <p class="card-title">UTCJ SUSTENTABLE</p>
+        </div>
+      </div>
+      <div class="card modern-card">
+        <div class="card-icon"><span>🚀</span></div>
+        <div>
+          <p class="card-sub">MÓDULO 3</p>
+          <p class="card-title">PROYECTOS</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="add-btn"><button>Añade una tarjeta</button></div>
+    
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content modern-footer">
+      <p>© 2025 Universidad - Proyecto</p>
+      <div>
+    <a href="aviso.html" class="footer-link">Aviso de privacidad</a>
+    <a href="terminos.html" class="footer-link">Términos</a>
+      </div>
+    </div>
+  </footer>
+  <script>
+    // Lista de imágenes para el carrusel
+    const images = [
+      'img1.jpg', // Reemplaza con la ruta de tus imágenes
+      'img2.jpg',
+      'img3.jpg'
+    ];
+    let currentIndex = 0;
+    const carouselImage = document.getElementById('carousel-image');
+    document.getElementById('carousel-prev').onclick = function() {
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      carouselImage.src = images[currentIndex];
+      carouselImage.classList.add('fade');
+      setTimeout(() => carouselImage.classList.remove('fade'), 400);
+    };
+    document.getElementById('carousel-next').onclick = function() {
+      currentIndex = (currentIndex + 1) % images.length;
+      carouselImage.src = images[currentIndex];
+      carouselImage.classList.add('fade');
+      setTimeout(() => carouselImage.classList.remove('fade'), 400);
+    };
+  </script>
+</body>
+</html>
