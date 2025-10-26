@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Prototipo Web - Módulos UTCJ</title>
+  <!-- Asegúrate de que style.css esté en la misma carpeta que este HTML -->
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar modern-navbar" style="background:#00b28f;">
+    <div class="container nav-content">
+      <img src="logo-utcj.png" alt="Logo UTCJ Sustentable" class="logo" />
+      <nav class="nav-links">
+        <a id="nav-inicio" class="nav-link">Inicio</a>
+        <a id="nav-nosotros" class="nav-link">Nosotros</a>
+        <a id="nav-contacto" class="nav-link">Contacto</a>
+        <a id="nav-registro" class="nav-link">Registro</a>
+        <span id="nav-user-links"></span>
+      </nav>
+      <div id="usuario-info" style="margin-left:2rem;font-weight:bold;color:#fff;"></div>
+      <button id="logout-btn" style="margin-left:1rem;padding:0.5rem 1rem;border-radius:8px;border:none;background:#fff;color:#00b28f;font-weight:bold;cursor:pointer;display:none;">Cerrar sesión</button>
+    </div>
+  </header>
+
+  <main class="container main-content">
+  <script>
+    // Obtener parámetros de usuario
+    function getParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        correo: params.get('correo'),
+        tipo: params.get('tipo'),
+        nombre: params.get('nombre')
+      };
+    }
+    // Navegación dinámica y sesión
+    function insertUserLinks() {
+      const { correo, tipo, nombre } = getParams();
+      // Enlaces con parámetros para mantener sesión
+      document.getElementById('nav-inicio').href = `index.html?correo=${correo||''}&tipo=${tipo||''}&nombre=${encodeURIComponent(nombre||'')}`;
+      document.getElementById('nav-nosotros').href = `nosotros.html?correo=${correo||''}&tipo=${tipo||''}&nombre=${encodeURIComponent(nombre||'')}`;
+      document.getElementById('nav-contacto').href = `contacto.html?correo=${correo||''}&tipo=${tipo||''}&nombre=${encodeURIComponent(nombre||'')}`;
+      document.getElementById('nav-registro').href = `registro.html?correo=${correo||''}&tipo=${tipo||''}&nombre=${encodeURIComponent(nombre||'')}`;
+      // Actualizar enlaces de usuario dinámicos
+      if (tipo === 'alumno') {
+        document.getElementById('nav-user-links').innerHTML = `
+          <a href="perfil.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Perfil</a>
+          <a href="mensajes.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Mensajes</a>
+        `;
+      } else if (tipo === 'maestro') {
+        document.getElementById('nav-user-links').innerHTML = `
+          <a href="perfil.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Perfil</a>
+          <a href="admin.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Panel Admin</a>
+        `;
+      }
+      if (correo && tipo && nombre) {
+        if (tipo === 'alumno') {
+          document.getElementById('usuario-info').innerHTML = `<a href="perfil.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" style="color:#fff;text-decoration:none;font-weight:bold;">Bienvenido, ${nombre} (${tipo})</a>`;
+          document.getElementById('nav-user-links').innerHTML = `
+            <a href="perfil.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Perfil</a>
+            <a href="mensajes.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Mensajes</a>
+          `;
+        } else if (tipo === 'maestro') {
+          document.getElementById('usuario-info').textContent = `Bienvenido, ${nombre} (${tipo})`;
+          document.getElementById('nav-user-links').innerHTML = `
+            <a href="perfil.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Perfil</a>
+            <a href="admin.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Panel Admin</a>
+          `;
+        } else {
+          document.getElementById('usuario-info').textContent = `Bienvenido, ${nombre} (${tipo})`;
+          document.getElementById('nav-user-links').innerHTML = '';
+        }
+        document.getElementById('logout-btn').style.display = 'inline-block';
+      } else {
+        document.getElementById('usuario-info').textContent = '';
+        document.getElementById('logout-btn').style.display = 'none';
+        document.getElementById('nav-user-links').innerHTML = '';
+      }
+    }
+    document.getElementById('logout-btn').onclick = function() {
+      window.location.href = 'login.html';
+    };
+    window.onload = insertUserLinks;
+  </script>
+  <script>
+    // Mostrar nombre y tipo de usuario si viene en la URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    const usuario = getQueryParam('usuario');
+    const tipo = getQueryParam('tipo');
+    if (usuario && tipo) {
+      document.getElementById('usuario-info').textContent = `Bienvenido, ${usuario} (${tipo})`;
+    }
+  </script>
+    <!-- Carrusel de imágenes moderno -->
+    <div class="carousel-container modern-carousel">
+      <button id="carousel-prev" class="carousel-arrow modern-arrow">&#10094;</button>
+      <img id="carousel-image" src="img1.jpg" alt="Imagen carrusel" class="modern-carousel-img">
+      <button id="carousel-next" class="carousel-arrow modern-arrow">&#10095;</button>
+    </div>
+  <!-- Se eliminó el bloque azul de módulo 1 -->
+
+    <div class="cards">
+      <div class="card modern-card">
+        <div class="card-icon"><span>🌟</span></div>
+        <div>
+          <p class="card-sub">MÓDULO 1</p>
+          <p class="card-title">CUERPO ACADÉMICO Y PROYECTOS</p>
+        </div>
+      </div>
+      <div class="card modern-card">
+        <div class="card-icon"><span>🌱</span></div>
+        <div>
+          <p class="card-sub">MÓDULO 2</p>
+          <p class="card-title">UTCJ SUSTENTABLE</p>
+        </div>
+      </div>
+      <div class="card modern-card">
+        <div class="card-icon"><span>🚀</span></div>
+        <div>
+          <p class="card-sub">MÓDULO 3</p>
+          <p class="card-title">PROYECTOS</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="add-btn"><button>Añade una tarjeta</button></div>
+    
+  </main>
+
+  <footer class="footer">
+    <div class="container footer-content modern-footer">
+      <p>© 2025 Universidad - Proyecto</p>
+      <div>
+    <a href="aviso.html" class="footer-link">Aviso de privacidad</a>
+    <a href="terminos.html" class="footer-link">Términos</a>
+      </div>
+    </div>
+  </footer>
+  <script>
+    // Lista de imágenes para el carrusel
+    const images = [
+      'img1.jpg', // Reemplaza con la ruta de tus imágenes
+      'img2.jpg',
+      'img3.jpg'
+    ];
+    let currentIndex = 0;
+    const carouselImage = document.getElementById('carousel-image');
+    document.getElementById('carousel-prev').onclick = function() {
+      currentIndex = (currentIndex - 1 + images.length) % images.length;
+      carouselImage.src = images[currentIndex];
+      carouselImage.classList.add('fade');
+      setTimeout(() => carouselImage.classList.remove('fade'), 400);
+    };
+    document.getElementById('carousel-next').onclick = function() {
+      currentIndex = (currentIndex + 1) % images.length;
+      carouselImage.src = images[currentIndex];
+      carouselImage.classList.add('fade');
+      setTimeout(() => carouselImage.classList.remove('fade'), 400);
+    };
+  </script>
+</body>
+</html>

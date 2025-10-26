@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Perfil de usuario - UTCJ Sustentable</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar modern-navbar" style="background:#00b28f;">
+    <img src="logo-utcj.png" alt="Logo UTCJ Sustentable" class="logo" />
+    <nav class="nav-links">
+  <a id="nav-inicio" class="nav-link">Inicio</a>
+  <a id="nav-registro" class="nav-link">Registro</a>
+      <span id="nav-user-links"></span>
+      <span id="nav-welcome" style="font-weight:bold;"></span>
+      <button id="btn-logout" onclick="logout()" style="display:none; margin-left:1rem; padding:0.5rem 1rem; border-radius:8px; border:none; background:#fff; color:#00b28f; font-weight:bold; cursor:pointer;">Cerrar sesión</button>
+    </nav>
+  </header>
+  <main>
+    <div class="perfil-container">
+      <h2>Perfil de usuario</h2>
+      <div id="perfil-info"></div>
+      <h3>Cambiar contraseña</h3>
+      <form id="cambiar-contrasena-form">
+        <label for="nueva-contrasena">Nueva contraseña</label>
+        <input type="password" id="nueva-contrasena" required>
+        <button type="submit" class="btn-green">Actualizar</button>
+      </form>
+      <h3>Historial de registros</h3>
+      <div id="historial-registros"></div>
+      <h3>Notificaciones</h3>
+      <div id="notificaciones"></div>
+    </div>
+  </main>
+  <footer class="footer modern-footer">
+    <a href="index.html" class="footer-link">Regresar al inicio</a>
+  </footer>
+  <script>
+    // Obtener parámetros de usuario
+    function getParams() {
+      const params = new URLSearchParams(window.location.search);
+      return {
+        correo: params.get('correo'),
+        tipo: params.get('tipo'),
+        nombre: params.get('nombre')
+      };
+    }
+    // Navegación dinámica y sesión
+    function insertUserLinks() {
+      const { correo, tipo, nombre } = getParams();
+      document.getElementById('nav-inicio').href = `index.html?correo=${correo||''}&tipo=${tipo||''}&nombre=${encodeURIComponent(nombre||'')}`;
+      document.getElementById('nav-registro').href = `registro.html?correo=${correo||''}&tipo=${tipo||''}&nombre=${encodeURIComponent(nombre||'')}`;
+      if (correo && tipo && nombre && tipo === 'alumno') {
+        document.getElementById('nav-user-links').innerHTML = `
+          <a href="perfil.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Perfil</a>
+          <a href="mensajes.html?correo=${correo}&tipo=${tipo}&nombre=${encodeURIComponent(nombre)}" class="nav-link">Mensajes</a>
+        `;
+        document.getElementById('nav-welcome').textContent = `Bienvenido, ${nombre} (${tipo})`;
+        document.getElementById('btn-logout').style.display = 'inline-block';
+      } else if (correo && tipo && nombre) {
+        document.getElementById('nav-user-links').innerHTML = '';
+        document.getElementById('nav-welcome').textContent = `Bienvenido, ${nombre} (${tipo})`;
+        document.getElementById('btn-logout').style.display = 'inline-block';
+      } else {
+        document.getElementById('nav-user-links').innerHTML = '';
+        document.getElementById('nav-welcome').textContent = '';
+        document.getElementById('btn-logout').style.display = 'none';
+      }
+    }
+    function logout() {
+      window.location.href = "login.html";
+    }
+    window.onload = insertUserLinks;
+  </script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5SZxwItdXrGMp5DNxiw9d_xtpLxUZqzo",
+      authDomain: "pwa-universidad.firebaseapp.com",
+      projectId: "pwa-universidad",
+      storageBucket: "pwa-universidad.firebasestorage.app",
+      messagingSenderId: "329437595863",
+      appId: "1:329437595863:web:af435f53e527d8f036c892",
+      measurementId: "G-C99MQN9C0B"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    // Obtener usuario desde la URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    const correo = getQueryParam('correo');
+    const tipo = getQueryParam('tipo');
+    // Mostrar datos del usuario
+    async function mostrarPerfil() {
+      let coleccion = tipo === 'maestro' ? 'maestros' : 'alumnos';
+      const res = await db.collection(coleccion).where('correo', '==', correo).get();
+      if (!res.empty) {
+        const datos = res.docs[0].data();
+        document.getElementById('perfil-info').innerHTML = `<b>Nombre:</b> ${datos.nombre}<br><b>Correo:</b> ${datos.correo}<br><b>Tipo:</b> ${tipo}`;
+      }
+    }
+    mostrarPerfil();
+    // Cambiar contraseña
+    document.getElementById('cambiar-contrasena-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const nueva = document.getElementById('nueva-contrasena').value;
+      let coleccion = tipo === 'maestro' ? 'maestros' : 'alumnos';
+      const res = await db.collection(coleccion).where('correo', '==', correo).get();
+      if (!res.empty) {
+        const id = res.docs[0].id;
+        await db.collection(coleccion).doc(id).update({ contrasena: nueva });
+        alert('Contraseña actualizada');
+      }
+    };
+    // Historial de registros (ejemplo: proyectos)
+    async function mostrarHistorial() {
+      let coleccion = tipo === 'maestro' ? 'proyectos' : 'actividades';
+      const res = await db.collection(coleccion).where('correo', '==', correo).get();
+      let html = '';
+      res.forEach(doc => {
+        html += `<div>${JSON.stringify(doc.data())}</div>`;
+      });
+      document.getElementById('historial-registros').innerHTML = html || 'Sin registros.';
+    }
+    mostrarHistorial();
+    // Notificaciones
+    async function mostrarNotificaciones() {
+      const res = await db.collection('notificaciones').where('correo', '==', correo).get();
+      let html = '';
+      res.forEach(doc => {
+        html += `<div>${doc.data().mensaje}</div>`;
+      });
+      document.getElementById('notificaciones').innerHTML = html || 'Sin notificaciones.';
+    }
+    mostrarNotificaciones();
+  </script>
+</body>
+</html>

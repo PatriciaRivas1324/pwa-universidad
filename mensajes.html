@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <title>Mensajería interna - UTCJ Sustentable</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="navbar modern-navbar" style="background:#00b28f;">
+    <img src="logo-utcj.png" alt="Logo UTCJ Sustentable" class="logo" />
+    <nav class="nav-links">
+      <a href="index.html" class="nav-link">Inicio</a>
+      <a href="perfil.html" class="nav-link">Perfil</a>
+      <a href="login.html" class="nav-link">Cerrar sesión</a>
+    </nav>
+  </header>
+  <main>
+    <div class="mensajes-container">
+      <h2>Mensajería interna</h2>
+      <form id="mensaje-form">
+        <label for="destinatario">Destinatario (correo)</label>
+        <input type="email" id="destinatario" required>
+        <label for="mensaje">Mensaje</label>
+        <textarea id="mensaje" required></textarea>
+        <button type="submit" class="btn-green">Enviar</button>
+      </form>
+      <h3>Mensajes recibidos</h3>
+      <div id="mensajes-recibidos"></div>
+    </div>
+  </main>
+  <footer class="footer modern-footer">
+    <a href="index.html" class="footer-link">Regresar al inicio</a>
+  </footer>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyA5SZxwItdXrGMp5DNxiw9d_xtpLxUZqzo",
+      authDomain: "pwa-universidad.firebaseapp.com",
+      projectId: "pwa-universidad",
+      storageBucket: "pwa-universidad.firebasestorage.app",
+      messagingSenderId: "329437595863",
+      appId: "1:329437595863:web:af435f53e527d8f036c892",
+      measurementId: "G-C99MQN9C0B"
+    };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+    // Obtener usuario desde la URL
+    function getQueryParam(param) {
+      const urlParams = new URLSearchParams(window.location.search);
+      return urlParams.get(param);
+    }
+    const correo = getQueryParam('correo');
+    // Enviar mensaje
+    document.getElementById('mensaje-form').onsubmit = async function(e) {
+      e.preventDefault();
+      const destinatario = document.getElementById('destinatario').value;
+      const mensaje = document.getElementById('mensaje').value;
+      await db.collection('mensajes').add({
+        remitente: correo,
+        destinatario,
+        mensaje,
+        fecha: new Date()
+      });
+      alert('Mensaje enviado');
+      document.getElementById('mensaje-form').reset();
+      mostrarMensajes();
+    };
+    // Mostrar mensajes recibidos
+    async function mostrarMensajes() {
+      const res = await db.collection('mensajes').where('destinatario', '==', correo).get();
+      let html = '';
+      res.forEach(doc => {
+        const datos = doc.data();
+        html += `<div><b>De:</b> ${datos.remitente}<br><b>Mensaje:</b> ${datos.mensaje}<br><b>Fecha:</b> ${new Date(datos.fecha.seconds*1000).toLocaleString()}</div><hr>`;
+      });
+      document.getElementById('mensajes-recibidos').innerHTML = html || 'Sin mensajes.';
+    }
+    mostrarMensajes();
+  </script>
+</body>
+</html>
